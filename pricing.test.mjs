@@ -1,0 +1,6 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {normalise,extractProducts} from './pricing.mjs';
+test('weight and count conversions',()=>{assert.equal(normalise(2,'kg').value,2);assert.ok(Math.abs(normalise(1,'lb').value-2.20462262)<1e-7);assert.equal(normalise(2,'pack',400,'g').value,5);assert.equal(normalise(2,'pack',4,'items').value,.5);assert.equal(normalise(.5,'100g').value,5);assert.equal(normalise(1,'each').basis,'each')});
+test('unknown quantities and invalid values stay incomparable',()=>{for(const v of ['',0,-2,Infinity,NaN])assert.equal(normalise(v,'kg'),null);assert.equal(normalise(2,'pack',null),null);assert.equal(normalise(2,'pack',0),null)});
+test('only actual structured GBP offers are extracted; missing weights stay unknown',()=>{const html='<script type="application/ld+json">'+JSON.stringify({'@graph':[{'@type':'Product',name:'Apples 400g',offers:{price:'2.50',priceCurrency:'GBP',url:'/product/1'}},{'@type':'Product',name:'Loose apples',offers:{price:'0.5',priceCurrency:'GBP'}},{'@type':'Product',name:'Apples',offers:{price:9,priceCurrency:'USD'}}]})+'</script>';const p=extractProducts(html,'https://example.com/search');assert.equal(p.length,2);assert.equal(p[0].amount,400);assert.equal(p[0].url,'https://example.com/product/1');assert.equal(p[1].amount,null)});
