@@ -20,7 +20,7 @@ export function extractProducts(html, base) {
         let url;try{url=new URL(o.url||x.url||base,base).href}catch{continue}
         const sizeText=html.match(/<span\b[^>]*class=["'][^"']*ProductSize_size[^"']*["'][^>]*>([^<]+)<\/span>/i)?.[1]||'';
         const label=String(x.name)+' '+sizeText;
-        const size=label.match(/(\d+(?:\.\d+)?)\s*(kg|g)\b/i);
+        const size=/typical weight/i.test(label)?null:label.match(/(\d+(?:\.\d+)?)\s*(kg|g)\b/i);
         const count=label.match(/\b(\d+)\s*(?:pack|each|pcs|s)\b/i);
         found.push({name:label.trim(),price:Number(o.price),url,unit:'pack',amount:size?Number(size[1]):count?Number(count[1]):null,packUnit:size?size[2].toLowerCase():count?'items':null,availability:o.availability||null});
       }
